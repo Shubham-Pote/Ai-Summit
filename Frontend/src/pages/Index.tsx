@@ -1,190 +1,369 @@
-import { Link, Navigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
-import { 
-  Brain, 
-  MessageCircle, 
-  BarChart3, 
-  Target, 
-  Mic, 
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import {
   BookOpen,
-  Trophy,
-  Zap,
+  MessageCircle,
+  Brain,
   Users,
-  Star
-} from "lucide-react";
+  Trophy,
+  Play,
+  Globe,
+  Zap,
+  Target,
+  Mic,
+  Calendar,
+  Sparkles,
+  Heart,
+} from "lucide-react"
 
-const Index = () => {
-  const { user, loading } = useAuth();
-
-  // Redirect to dashboard if already logged in
-  if (!loading && user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  const features = [
-    {
-      icon: BookOpen,
-      title: "Interactive Lessons",
-      description: "Personalized learning paths tailored to your pace and style"
-    },
-    {
-      icon: MessageCircle,
-      title: "AI Conversational Tutor",
-      description: "Chat with your AI tutor for instant help and explanations"
-    },
-    {
-      icon: BarChart3,
-      title: "Progress Tracking",
-      description: "Visual charts showing your accuracy, fluency, and improvement"
-    },
-    {
-      icon: Mic,
-      title: "Speech Recognition",
-      description: "Advanced phoneme scoring and accent evaluation"
-    },
-    {
-      icon: Trophy,
-      title: "Gamification",
-      description: "Earn XP points, maintain streaks, and unlock achievements"
-    },
-    {
-      icon: Target,
-      title: "Smart Goals",
-      description: "Set and track personalized learning goals with reminders"
-    }
-  ];
-
-  const stats = [
-    { number: "10M+", label: "Active Learners" },
-    { number: "50+", label: "Languages" },
-    { number: "95%", label: "Success Rate" },
-    { number: "24/7", label: "AI Support" }
-  ];
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center space-y-8">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-white">
-            <Zap className="w-4 h-4 text-accent" />
-            <span className="text-sm">Powered by Advanced AI Technology</span>
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight">
-            Master Any Language with
-            <span className="block bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent">
-              AI-Powered Learning
-            </span>
-          </h1>
-          
-          <p className="text-xl text-white/80 max-w-2xl mx-auto">
-            Experience the future of language learning with our AI-based platform. 
-            Personalized lessons, real-time feedback, and gamified progress tracking.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-white shadow-glow">
-              <Link to="/signup">Start Learning Now</Link>
-            </Button>
-            <Button size="lg" asChild variant="outline" className="border-white/20 text-white hover:bg-white/10">
-              <Link to="/signin">Sign In</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="text-4xl font-bold text-white mb-2">{stat.number}</div>
-              <div className="text-white/70">{stat.label}</div>
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-blue-50">
+      {/* Navigation */}
+      <nav className="border-b border-white/20 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+              <Brain className="w-6 h-6 text-white" />
             </div>
-          ))}
+            <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              AI Learn
+            </span>
+          </div>
+          <Button className="bg-green-500 hover:bg-green-600 text-white font-bold px-6 rounded-full shadow-lg">
+            <a href="/signup" className="text-white no-underline">
+              Get Started
+            </a>
+          </Button>
         </div>
-      </section>
+      </nav>
 
-      {/* Features Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-6">
-            Everything You Need to Learn
-          </h2>
-          <p className="text-xl text-white/70 max-w-2xl mx-auto">
-            Our comprehensive platform includes all the tools and features 
-            you need for successful language learning.
+      {/* Hero Section */}
+      <section className="py-20 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-100/50 to-blue-100/50"></div>
+        <div className="container mx-auto text-center max-w-4xl relative">
+          <div className="mb-8">
+            <Badge className="bg-yellow-400 text-gray-800 border-0 px-4 py-2 text-sm font-bold rounded-full shadow-lg">
+              <Sparkles className="w-4 h-4 mr-2" />
+              The fun way to learn languages
+            </Badge>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black text-gray-800 mb-6 text-balance leading-tight">
+            Learn languages
+            <br />
+            <span className="bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">with AI</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-600 mb-12 text-pretty max-w-3xl mx-auto font-medium">
+            Practice conversations with AI tutors, play interactive games, and master any language through personalized
+            learning that adapts to you.
           </p>
-        </div>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20 p-6 hover:bg-white/15 transition-colors">
-                <div className="bg-gradient-primary rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-white/70">{feature.description}</p>
-              </Card>
-            );
-          })}
+          <Button
+            size="lg"
+            className="bg-green-500 hover:bg-green-600 text-white font-bold px-12 py-4 text-lg rounded-full shadow-xl transform hover:scale-105 transition-all duration-200"
+          >
+            <Play className="w-6 h-6 mr-3" />
+            <a href="/signup" className="text-white no-underline">
+              GET STARTED
+            </a>
+          </Button>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-6">
-            Loved by Millions of Learners
-          </h2>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="bg-white/10 backdrop-blur-sm border-white/20 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                {[...Array(5)].map((_, j) => (
-                  <Star key={j} className="w-4 h-4 fill-accent text-accent" />
-                ))}
+      {/* Why AI Learn Section */}
+      <section className="py-20 px-4 bg-white">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-800 mb-6">Why AI Learn works</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Our AI-powered approach makes language learning effective, engaging, and fun
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-200">
+                <MessageCircle className="w-10 h-10 text-white" />
               </div>
-              <p className="text-white/80 mb-4">
-                "This platform completely transformed my language learning journey. 
-                The AI tutor is incredibly helpful and the gamification keeps me motivated!"
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">AI Conversations</h3>
+              <p className="text-gray-600 text-lg">
+                Chat with AI tutors that understand context and provide instant feedback on your language skills
               </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-success rounded-full flex items-center justify-center">
-                  <Users className="w-5 h-5 text-white" />
+            </div>
+
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-200">
+                <Users className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Interactive Characters</h3>
+              <p className="text-gray-600 text-lg">
+                Meet diverse AI personalities and practice real-world conversations in different scenarios
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-200">
+                <Target className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Personalized Learning</h3>
+              <p className="text-gray-600 text-lg">
+                AI adapts to your pace and learning style, creating custom lessons that keep you motivated
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Study Tools Section */}
+      <section className="py-20 px-4 bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-800 mb-6">Your complete study toolkit</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Everything you need to master languages, all in one place
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <BookOpen className="w-12 h-12 mb-4 mx-auto" />
+                <h3 className="font-bold text-lg mb-2">Reading</h3>
+                <p className="text-sm opacity-90">Interactive stories</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <BookOpen className="w-12 h-12 mb-4 mx-auto" />
+                <h3 className="font-bold text-lg mb-2">Notes</h3>
+                <p className="text-sm opacity-90">Study materials</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <MessageCircle className="w-12 h-12 mb-4 mx-auto" />
+                <h3 className="font-bold text-lg mb-2">AI Chat</h3>
+                <p className="text-sm opacity-90">Personal tutor</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <Brain className="w-12 h-12 mb-4 mx-auto" />
+                <h3 className="font-bold text-lg mb-2">Quiz</h3>
+                <p className="text-sm opacity-90">Test knowledge</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white border-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <Trophy className="w-12 h-12 mb-4 mx-auto" />
+                <h3 className="font-bold text-lg mb-2">Progress</h3>
+                <p className="text-sm opacity-90">Track achievements</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white border-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <Target className="w-12 h-12 mb-4 mx-auto" />
+                <h3 className="font-bold text-lg mb-2">Goals</h3>
+                <p className="text-sm opacity-90">Set targets</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white border-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <Mic className="w-12 h-12 mb-4 mx-auto" />
+                <h3 className="font-bold text-lg mb-2">Speech</h3>
+                <p className="text-sm opacity-90">Practice pronunciation</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-pink-500 to-pink-600 text-white border-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <Calendar className="w-12 h-12 mb-4 mx-auto" />
+                <h3 className="font-bold text-lg mb-2">Daily Words</h3>
+                <p className="text-sm opacity-90">New vocabulary</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 px-4 bg-white">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-800 mb-6">How it works</h2>
+            <p className="text-xl text-gray-600">Start speaking a new language in minutes</p>
+          </div>
+
+          <div className="space-y-12">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1 text-center md:text-left">
+                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-6 mx-auto md:mx-0 shadow-lg">
+                  <span className="text-2xl font-black text-white">1</span>
                 </div>
-                <div>
-                  <div className="font-semibold text-white">Sarah Johnson</div>
-                  <div className="text-sm text-white/60">Spanish Learner</div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">Choose your language</h3>
+                <p className="text-lg text-gray-600">
+                  Pick from dozens of languages and tell us your goals. Our AI will create a personalized learning path
+                  just for you.
+                </p>
+              </div>
+              <div className="flex-1">
+                <div className="w-full h-64 bg-gradient-to-br from-green-100 to-blue-100 rounded-3xl flex items-center justify-center shadow-lg">
+                  <Globe className="w-24 h-24 text-green-500" />
                 </div>
               </div>
-            </Card>
-          ))}
+            </div>
+
+            <div className="flex flex-col md:flex-row-reverse items-center gap-8">
+              <div className="flex-1 text-center md:text-left">
+                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-6 mx-auto md:mx-0 shadow-lg">
+                  <span className="text-2xl font-black text-white">2</span>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">Meet your AI tutor</h3>
+                <p className="text-lg text-gray-600">
+                  Start conversations with AI characters who adapt to your level and interests. Practice real scenarios
+                  you'll actually use.
+                </p>
+              </div>
+              <div className="flex-1">
+                <div className="w-full h-64 bg-gradient-to-br from-blue-100 to-purple-100 rounded-3xl flex items-center justify-center shadow-lg">
+                  <MessageCircle className="w-24 h-24 text-blue-500" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1 text-center md:text-left">
+                <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mb-6 mx-auto md:mx-0 shadow-lg">
+                  <span className="text-2xl font-black text-white">3</span>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">Track your progress</h3>
+                <p className="text-lg text-gray-600">
+                  Watch your skills grow with detailed progress tracking, achievements, and personalized feedback from
+                  your AI tutor.
+                </p>
+              </div>
+              <div className="flex-1">
+                <div className="w-full h-64 bg-gradient-to-br from-purple-100 to-pink-100 rounded-3xl flex items-center justify-center shadow-lg">
+                  <Trophy className="w-24 h-24 text-purple-500" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center space-y-8">
-          <h2 className="text-4xl font-bold text-white">
-            Ready to Start Your Learning Journey?
-          </h2>
-          <p className="text-xl text-white/70">
-            Join millions of learners and experience the future of language education.
+      <section className="py-20 px-4 bg-gradient-to-r from-green-500 to-blue-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="container mx-auto text-center max-w-3xl relative">
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-6">Start your language journey today</h2>
+          <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto">
+            Join millions of learners who are already speaking new languages with confidence. It's free, fun, and
+            effective.
           </p>
-          <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-white shadow-glow">
-            <Link to="/signup">Get Started for Free</Link>
+          <Button
+            size="lg"
+            className="bg-white text-green-600 hover:bg-gray-100 font-bold px-12 py-4 text-lg rounded-full shadow-xl transform hover:scale-105 transition-all duration-200"
+          >
+            <Zap className="w-6 h-6 mr-3" />
+            <a href="/signup" className="text-green-600 no-underline">
+              GET STARTED FOR FREE
+            </a>
           </Button>
         </div>
       </section>
-    </div>
-  );
-};
 
-export default Index;
+      {/* Footer */}
+      <footer className="py-12 px-4 bg-gray-50 border-t">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                  <Brain className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  AI Learn
+                </span>
+              </div>
+              <p className="text-gray-600">
+                The fun way to learn languages with AI-powered tutors and interactive conversations.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-800 mb-4">Learn</h4>
+              <ul className="space-y-2 text-gray-600">
+                <li>
+                  <a href="/languages" className="hover:text-green-600 transition-colors">
+                    Languages
+                  </a>
+                </li>
+                <li>
+                  <a href="/characters" className="hover:text-green-600 transition-colors">
+                    AI Characters
+                  </a>
+                </li>
+                <li>
+                  <a href="/study-hub" className="hover:text-green-600 transition-colors">
+                    Study Hub
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-800 mb-4">Company</h4>
+              <ul className="space-y-2 text-gray-600">
+                <li>
+                  <a href="/about" className="hover:text-green-600 transition-colors">
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a href="/blog" className="hover:text-green-600 transition-colors">
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a href="/careers" className="hover:text-green-600 transition-colors">
+                    Careers
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-800 mb-4">Support</h4>
+              <ul className="space-y-2 text-gray-600">
+                <li>
+                  <a href="/help" className="hover:text-green-600 transition-colors">
+                    Help Center
+                  </a>
+                </li>
+                <li>
+                  <a href="/privacy" className="hover:text-green-600 transition-colors">
+                    Privacy
+                  </a>
+                </li>
+                <li>
+                  <a href="/terms" className="hover:text-green-600 transition-colors">
+                    Terms
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500">
+            <p>
+              &copy; 2025 AI Learn. Made with <Heart className="w-4 h-4 inline text-red-500" /> for language learners.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}
