@@ -1,35 +1,24 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-// ✅ Updated interface with all required fields
 export interface IUser extends mongoose.Document {
-    
     email: string;
     password: string;
     displayName: string;
-    
-    // ✅ Add these missing fields
-    fullName?: string;
     bio?: string;
     location?: string;
     avatarUrl?: string;
-    
     level: number;
     xp: number;
     streak: number;
     joinDate: Date;
-    
-    // ✅ Timestamp fields (added by { timestamps: true })
     createdAt?: Date;
     updatedAt?: Date;
-    
     languages: string[];
     currentLanguage: string;
-    
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-// ✅ Updated schema with all fields
 const userSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -48,7 +37,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    
     bio: {
         type: String,
         maxlength: 500,
@@ -90,7 +78,7 @@ const userSchema = new mongoose.Schema({
         default: 'japanese'
     }
 }, { 
-    timestamps: true // ✅ This adds createdAt and updatedAt
+    timestamps: true
 });
 
 // Hash password before saving

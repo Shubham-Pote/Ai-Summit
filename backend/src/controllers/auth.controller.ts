@@ -31,10 +31,21 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password, displayName } = req.body;
 
+        // ✅ FIXED: Better validation
         if (!email || !password || !displayName) {
             res.status(400).json({ 
                 success: false, 
                 message: 'Email, password, and display name are required' 
+            });
+            return;
+        }
+
+        // ✅ FIXED: Trim and validate displayName
+        const trimmedDisplayName = displayName.trim();
+        if (trimmedDisplayName.length < 2) {
+            res.status(400).json({ 
+                success: false, 
+                message: 'Display name must be at least 2 characters long' 
             });
             return;
         }
@@ -48,20 +59,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        let usernameBase = email.split('@')[0].toLowerCase();
-        let username = usernameBase;
-        let counter = 0;
-        
-        while (await User.findOne({ username })) {
-            counter++;
-            username = `${usernameBase}${counter}`;
-        }
-
+        // ✅ FIXED: Create user with proper field mapping
         const user = new User({
-            username,
             email: email.toLowerCase(),
             password,
-            displayName: displayName.trim(),
+            displayName: trimmedDisplayName,
             currentLanguage: 'spanish'
         });
 
@@ -74,6 +76,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
         res.status(201).json({
             success: true,
+            message: 'User registered successfully',
             token,
             user: {
                 id: user._id,
@@ -83,11 +86,23 @@ export const register = async (req: Request, res: Response): Promise<void> => {
                 currentLanguage: user.currentLanguage
             }
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Registration error:', error);
+        
+        // ✅ FIXED: Handle specific MongoDB errors
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyValue)[0];
+            res.status(400).json({ 
+                success: false, 
+                message: `${field} already exists` 
+            });
+            return;
+        }
+        
         res.status(500).json({ 
             success: false, 
-            message: 'Error creating user' 
+            message: 'Error creating user',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };
@@ -96,6 +111,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password } = req.body;
+
+        if (!email || !password) {
+            res.status(400).json({ 
+                success: false, 
+                message: 'Email and password are required' 
+            });
+            return;
+        }
 
         const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) {
@@ -210,7 +233,7 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
   }
 };
 
-// ✅ FIXED: Update Profile
+// Update Profile
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { displayName, bio, location, avatarUrl } = req.body;
@@ -247,9 +270,8 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       return;
     }
 
-    // ✅ FIXED: Correct field mapping
     const updateData: any = {};
-    if (displayName !== undefined) updateData.displayName = displayName.trim(); // ✅ FIXED!
+    if (displayName !== undefined) updateData.displayName = displayName.trim();
     if (bio !== undefined) updateData.bio = bio.trim();
     if (location !== undefined) updateData.location = location.trim();
     if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl.trim();
@@ -292,11 +314,9 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
   }
 };
 
-// ✅ EASIER ACHIEVEMENTS: Much more achievable goals
 async function calculateAchievements(userId: string, stats: any) {
   const achievements = [];
 
-  // First Steps - Complete 1 lesson
   if (stats.lessonsCompleted >= 1) {
     achievements.push({
       id: 'first_lesson',
@@ -309,7 +329,6 @@ async function calculateAchievements(userId: string, stats: any) {
     });
   }
 
-  // Getting Started - 3 day streak
   if (stats.streak >= 3) {
     achievements.push({
       id: 'three_days',
@@ -322,7 +341,6 @@ async function calculateAchievements(userId: string, stats: any) {
     });
   }
 
-  // Quick Learner - 5 lessons completed
   if (stats.lessonsCompleted >= 5) {
     achievements.push({
       id: 'five_lessons',
@@ -335,7 +353,6 @@ async function calculateAchievements(userId: string, stats: any) {
     });
   }
 
-  // Good Score - 75%+ average
   if (stats.averageScore >= 75) {
     achievements.push({
       id: 'good_score',
@@ -348,7 +365,6 @@ async function calculateAchievements(userId: string, stats: any) {
     });
   }
 
-  // Study Time - 15+ minutes
   if (stats.timeSpent >= 15) {
     achievements.push({
       id: 'study_time',
@@ -361,7 +377,6 @@ async function calculateAchievements(userId: string, stats: any) {
     });
   }
 
-  // Dedicated - 7 day streak
   if (stats.streak >= 7) {
     achievements.push({
       id: 'week_streak',
@@ -374,7 +389,6 @@ async function calculateAchievements(userId: string, stats: any) {
     });
   }
 
-  // Level Up - Reach level 2
   if (stats.level >= 2) {
     achievements.push({
       id: 'level_two',
@@ -514,6 +528,3 @@ export const updateUserPreferences = async (req: AuthRequest, res: Response): Pr
         });
     }
 };
-
-// Update Display Name
-
