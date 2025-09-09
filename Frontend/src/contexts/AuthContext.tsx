@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('🔐 Register attempt for:', userData.email);
       
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch('https://ai-summit-fic4.vercel.app/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('🔐 Login attempt for:', email);
       
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('https://ai-summit-fic4.vercel.app/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -148,7 +148,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('http://localhost:5000/api/auth/language', {
+      const response = await fetch('https://ai-summit-fic4.vercel.app/api/auth/language', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

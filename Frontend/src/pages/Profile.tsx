@@ -61,7 +61,7 @@ const Profile = () => {
         return
       }
 
-      const response = await fetch("http://localhost:5000/api/auth/profile", {
+      const response = await fetch("https://ai-summit-fic4.vercel.app/api/auth/profile", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -123,7 +123,7 @@ const Profile = () => {
       console.log("🔄 Updating profile with data:", formData)
 
       // ✅ This matches your backend exactly: PUT /api/auth/profile
-      const response = await fetch("http://localhost:5000/api/auth/profile", {
+      const response = await fetch("https://ai-summit-fic4.vercel.app/api/auth/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
