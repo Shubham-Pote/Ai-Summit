@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://ai-summit-fic4.vercel.app/api';
 
 // Token management functions
 export const setToken = (token: string) => {
