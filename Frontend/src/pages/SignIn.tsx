@@ -88,7 +88,7 @@ const SignIn = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-14 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 rounded-lg text-base focus:border-teal-400 focus:ring-teal-400 pr-24"
+              className="h-14 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 rounded-lg text-base focus:border-teal-400 focus:ring-teal-400 pr-12"
               required
             />
             
@@ -96,7 +96,7 @@ const SignIn = () => {
             <button
               type="button"
               onClick={togglePasswordVisibility}
-              className="absolute right-12 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-teal-400 transition-colors p-1"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-teal-400 transition-colors p-1"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -104,14 +104,6 @@ const SignIn = () => {
               ) : (
                 <Eye className="h-5 w-5" />
               )}
-            </button>
-
-            {/* Forgot password button */}
-            <button
-              type="button"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-teal-400 text-xs font-medium px-2 py-1"
-            >
-              FORGOT?
             </button>
           </div>
 
