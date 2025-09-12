@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToast } from "@/hooks/use-toast"
+import { Eye, EyeOff } from "lucide-react"
 
 const SignIn = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const { login } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
@@ -48,6 +50,10 @@ const SignIn = () => {
     }
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-700 to-teal-800 flex items-center justify-center p-4">
       <Link to="/" className="absolute top-6 left-6 text-slate-400 hover:text-white text-2xl font-light">
@@ -78,16 +84,32 @@ const SignIn = () => {
 
           <div className="relative">
             <Input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-14 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 rounded-lg text-base focus:border-teal-400 focus:ring-teal-400"
+              className="h-14 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 rounded-lg text-base focus:border-teal-400 focus:ring-teal-400 pr-24"
               required
             />
+            
+            {/* Password visibility toggle button */}
             <button
               type="button"
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-teal-400 text-sm font-medium"
+              onClick={togglePasswordVisibility}
+              className="absolute right-12 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-teal-400 transition-colors p-1"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+
+            {/* Forgot password button */}
+            <button
+              type="button"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-teal-400 text-xs font-medium px-2 py-1"
             >
               FORGOT?
             </button>

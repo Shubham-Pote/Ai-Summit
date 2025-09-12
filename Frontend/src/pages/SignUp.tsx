@@ -7,15 +7,26 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToast } from "@/hooks/use-toast"
+import { Eye, EyeOff, Check, X } from "lucide-react"
 
 const SignUp = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [displayName, setDisplayName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const { register } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
+
+  // Password strength indicators
+  const passwordChecks = {
+    length: password.length >= 6,
+    hasUpperCase: /[A-Z]/.test(password),
+    hasLowerCase: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+    hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,6 +73,23 @@ const SignUp = () => {
     }
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
+  const PasswordStrengthIndicator = ({ check, label }: { check: boolean; label: string }) => (
+    <div className="flex items-center space-x-2">
+      {check ? (
+        <Check className="h-3 w-3 text-green-400" />
+      ) : (
+        <X className="h-3 w-3 text-slate-400" />
+      )}
+      <span className={`text-xs ${check ? 'text-green-400' : 'text-slate-400'}`}>
+        {label}
+      </span>
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-700 to-teal-800 flex items-center justify-center p-4">
       <Link to="/" className="absolute top-6 left-6 text-slate-400 hover:text-white text-2xl font-light">
@@ -99,14 +127,57 @@ const SignUp = () => {
             required
           />
 
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="h-14 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 rounded-lg text-base focus:border-teal-400 focus:ring-teal-400"
-            required
-          />
+          <div className="relative">
+            <Input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-14 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 rounded-lg text-base focus:border-teal-400 focus:ring-teal-400 pr-12"
+              required
+            />
+            
+            {/* Password visibility toggle button */}
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-teal-400 transition-colors p-1"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+
+          {/* Password strength indicator */}
+          {password && (
+            <div className="bg-slate-700/30 rounded-lg p-3 space-y-1">
+              <p className="text-xs text-slate-300 font-medium mb-2">Password Requirements:</p>
+              <PasswordStrengthIndicator 
+                check={passwordChecks.length} 
+                label="At least 6 characters" 
+              />
+              <PasswordStrengthIndicator 
+                check={passwordChecks.hasUpperCase} 
+                label="One uppercase letter" 
+              />
+              <PasswordStrengthIndicator 
+                check={passwordChecks.hasLowerCase} 
+                label="One lowercase letter" 
+              />
+              <PasswordStrengthIndicator 
+                check={passwordChecks.hasNumber} 
+                label="One number" 
+              />
+              <PasswordStrengthIndicator 
+                check={passwordChecks.hasSpecialChar} 
+                label="One special character" 
+              />
+            </div>
+          )}
 
           <Button
             type="submit"
