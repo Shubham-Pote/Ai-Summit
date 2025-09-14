@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://ai-summit-fic4.vercel.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // Token management functions
 export const setToken = (token: string) => {
@@ -7,6 +7,160 @@ export const setToken = (token: string) => {
 
 export const getToken = () => {
   return localStorage.getItem('token');
+};
+
+// Profile API functions
+export const profileAPI = {
+  getProfile: async () => {
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch profile');
+    }
+
+    return await response.json();
+  },
+
+  // Character API functions
+  getCharacters: async () => {
+    const response = await fetch(`${API_BASE_URL}/characters`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch characters');
+    }
+
+    return await response.json();
+  },
+
+  getCharacterById: async (characterId: string) => {
+    const response = await fetch(`${API_BASE_URL}/characters/${characterId}`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch character');
+    }
+
+    return await response.json();
+  },
+
+  unlockCharacter: async (characterId: string) => {
+    const response = await fetch(`${API_BASE_URL}/characters/${characterId}/unlock`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to unlock character');
+    }
+
+    return await response.json();
+  },
+
+  getCharacterStats: async (characterId: string) => {
+    const response = await fetch(`${API_BASE_URL}/characters/${characterId}/stats`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch character stats');
+    }
+
+    return await response.json();
+  },
+
+  // Conversation API functions
+  startConversation: async (characterId: string) => {
+    const response = await fetch(`${API_BASE_URL}/conversations`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ characterId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to start conversation');
+    }
+
+    return await response.json();
+  },
+
+  sendMessage: async (conversationId: string, message: string, isAudio: boolean = false) => {
+    const response = await fetch(`${API_BASE_URL}/conversations/${conversationId}/messages`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ message, isAudio }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send message');
+    }
+
+    return await response.json();
+  },
+
+  getConversationHistory: async (characterId: string) => {
+    const response = await fetch(`${API_BASE_URL}/conversations/history/${characterId}`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch conversation history');
+    }
+
+    return await response.json();
+  },
+
+  // Audio API functions
+  uploadAudio: async (audioBlob: Blob, conversationId: string) => {
+    const formData = new FormData();
+    formData.append('audio', audioBlob);
+    formData.append('conversationId', conversationId);
+
+    const response = await fetch(`${API_BASE_URL}/audio/upload`, {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'multipart/form-data',
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload audio');
+    }
+
+    return await response.json();
+  },
+
+  getAudioResponse: async (messageId: string) => {
+    const response = await fetch(`${API_BASE_URL}/audio/${messageId}`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get audio response');
+    }
+
+    return await response.json();
+  },
+
+  updateProfile: async (data: { displayName: string; bio: string; location: string }) => {
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update profile');
+    }
+
+    return await response.json();
+  },
 };
 
 export const removeToken = () => {

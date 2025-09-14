@@ -1,106 +1,71 @@
+import { useState, useEffect, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { 
-  Users, 
-  MessageCircle, 
-  Star,
-  BookOpen,
-  Play,
-  Lock,
-  Crown,
-  Heart,
-  MapPin,
-  Calendar
-} from "lucide-react";
+import { MessageCircle, Globe, Star, Crown, Heart, Users } from "lucide-react";
+import { useAuth } from '@/contexts/AuthContext';
+import { profileAPI } from '@/lib/api';
+import { toast } from '@/hooks/use-toast';
+import type { Character } from '@/types/character';
+import CharacterViewer from '@/components/character/CharacterViewer';
 
 const Characters = () => {
-  const characters = [
-    {
-      id: 1,
-      name: "María González",
-      age: 28,
-      occupation: "Chef",
-      location: "Madrid, Spain",
-      personality: "Cheerful, passionate about cooking",
-      backstory: "Runs a small family restaurant in Madrid's historic center. Loves sharing traditional recipes with visitors.",
-      unlocked: true,
-      relationshipLevel: 85,
-      conversationsCompleted: 12,
-      avatar: "👩‍🍳",
-      specialties: ["Food vocabulary", "Restaurant conversations", "Spanish culture"],
-      difficulty: "Beginner",
-      lastInteraction: "2 hours ago"
-    },
-    {
-      id: 2,
-      name: "Carlos Mendoza",
-      age: 35,
-      occupation: "Travel Guide",
-      location: "Barcelona, Spain", 
-      personality: "Adventurous, knowledgeable, friendly",
-      backstory: "Professional tour guide who has traveled across Spain and Latin America. Expert in history and local customs.",
-      unlocked: true,
-      relationshipLevel: 62,
-      conversationsCompleted: 8,
-      avatar: "🧔‍♂️",
-      specialties: ["Travel vocabulary", "Directions", "History and culture"],
-      difficulty: "Intermediate",
-      lastInteraction: "1 day ago"
-    },
-    {
-      id: 3,
-      name: "Dr. Ana Ruiz",
-      age: 42,
-      occupation: "Doctor",
-      location: "Buenos Aires, Argentina",
-      personality: "Professional, caring, patient",
-      backstory: "Works at a public hospital in Buenos Aires. Passionate about helping people and teaching medical Spanish to international students.",
-      unlocked: true,
-      relationshipLevel: 45,
-      conversationsCompleted: 5,
-      avatar: "👩‍⚕️",
-      specialties: ["Medical vocabulary", "Formal conversations", "Argentinian Spanish"],
-      difficulty: "Advanced",
-      lastInteraction: "3 days ago"
-    },
-    {
-      id: 4,
-      name: "Javier Rivera",
-      age: 22,
-      occupation: "University Student",
-      location: "Mexico City, Mexico",
-      personality: "Energetic, modern, tech-savvy",
-      backstory: "Computer science student who loves video games, social media, and pop culture. Speaks with modern slang and expressions.",
-      unlocked: false,
-      relationshipLevel: 0,
-      conversationsCompleted: 0,
-      avatar: "👨‍💻",
-      specialties: ["Modern slang", "Technology", "Mexican culture"],
-      difficulty: "Intermediate",
-      lastInteraction: null,
-      unlockRequirement: "Complete 15 conversations with other characters"
-    },
-    {
-      id: 5,
-      name: "Doña Carmen",
-      age: 67,
-      occupation: "Retired Teacher",
-      location: "Sevilla, Spain",
-      personality: "Wise, traditional, storyteller",
-      backstory: "Retired Spanish literature teacher who loves sharing stories about old Spain. Speaks formally and uses traditional expressions.",
-      unlocked: false,
-      relationshipLevel: 0,
-      conversationsCompleted: 0,
-      avatar: "👵",
-      specialties: ["Formal Spanish", "Literature", "Traditional culture"],
-      difficulty: "Advanced",
-      lastInteraction: null,
-      unlockRequirement: "Reach Level 10"
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCharacters = async () => {
+      try {
+        const { characters } = await profileAPI.getCharacters();
+        setCharacters(characters);
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch characters',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCharacters();
+  }, []);
+
+  const handleUnlock = async (characterId: string) => {
+    try {
+      await profileAPI.unlockCharacter(characterId);
+      const { characters: updatedCharacters } = await profileAPI.getCharacters();
+      setCharacters(updatedCharacters);
+      toast({
+        title: 'Success',
+        description: 'Character unlocked successfully!',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to unlock character',
+        variant: 'destructive',
+      });
     }
-  ];
+  };
+
+  const handleStartChat = (characterId: string) => {
+    navigate(`/chat/${characterId}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -120,220 +85,125 @@ const Characters = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold">Interactive Characters</h1>
-        <p className="text-muted-foreground">Practice conversations with diverse Spanish-speaking personalities</p>
-      </div>
-
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold">{characters.filter(c => c.unlocked).length}</p>
-                <p className="text-sm text-muted-foreground">Characters Unlocked</p>
-              </div>
-              <Users className="w-8 h-8 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold">{characters.reduce((sum, c) => sum + c.conversationsCompleted, 0)}</p>
-                <p className="text-sm text-muted-foreground">Total Conversations</p>
-              </div>
-              <MessageCircle className="w-8 h-8 text-secondary" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold">{Math.round(characters.filter(c => c.unlocked).reduce((sum, c) => sum + c.relationshipLevel, 0) / characters.filter(c => c.unlocked).length) || 0}%</p>
-                <p className="text-sm text-muted-foreground">Avg. Relationship</p>
-              </div>
-              <Heart className="w-8 h-8 text-streak-fire" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold">{characters.filter(c => c.relationshipLevel >= 80).length}</p>
-                <p className="text-sm text-muted-foreground">Best Friends</p>
-              </div>
-              <Crown className="w-8 h-8 text-xp-gold" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Characters Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {characters.map((character) => {
-          const relationship = getRelationshipLevel(character.relationshipLevel);
-          const RelationshipIcon = relationship.icon;
-
-          return (
-            <Card key={character.id} className={`bg-gradient-card hover:shadow-md transition-all ${!character.unlocked ? 'opacity-60' : ''}`}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="w-16 h-16 text-2xl">
-                      <AvatarFallback>{character.avatar}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-xl">{character.name}</CardTitle>
-                        {!character.unlocked && <Lock className="w-4 h-4 text-muted-foreground" />}
-                      </div>
-                      <CardDescription className="flex items-center gap-2 mt-1">
-                        <span>{character.occupation}</span>
-                        <span>•</span>
-                        <span>{character.age} years old</span>
-                      </CardDescription>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                        <MapPin className="w-4 h-4" />
-                        {character.location}
+    <div className="container mx-auto py-8">
+      <h1 className="text-4xl font-bold mb-8">Language Learning Characters</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {characters.map((character) => (
+          <Card key={character._id} className="overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>{character.name}</span>
+                <Badge variant={character.difficultyLevel === 'beginner' ? 'default' : 
+                             character.difficultyLevel === 'intermediate' ? 'secondary' : 'destructive'}>
+                  {character.difficultyLevel}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            
+            <div className="h-[300px] relative overflow-hidden rounded-md">
+              {character.modelUrl ? (
+                <div className="relative w-full h-full bg-gradient-to-b from-muted/5 to-muted/20">
+                  <Suspense fallback={
+                    <div className="flex items-center justify-center h-full">
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <span className="text-sm text-muted-foreground">Loading 3D model...</span>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex flex-col items-end gap-2">
-                    <Badge className={getDifficultyColor(character.difficulty)}>
-                      {character.difficulty}
-                    </Badge>
-                    {character.unlocked && (
-                      <div className={`flex items-center gap-1 text-sm ${relationship.color}`}>
-                        <RelationshipIcon className="w-4 h-4" />
-                        {relationship.label}
-                      </div>
-                    )}
-                  </div>
+                  }>
+                    <CharacterViewer 
+                      modelUrl={character.modelUrl} 
+                      className="w-full h-full"
+                    />
+                  </Suspense>
                 </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  <strong>Personality:</strong> {character.personality}
-                </p>
-                
-                <p className="text-sm">
-                  {character.backstory}
-                </p>
-
-                {/* Specialties */}
+              ) : (
+                <div className="flex items-center justify-center h-full bg-gradient-to-b from-muted/5 to-muted/20">
+                  <Avatar className="h-24 w-24">
+                    <AvatarFallback className="bg-primary/10">
+                      {character.avatar || character.name[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              )}
+            </div>
+            
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  <span>{character.nationality}</span>
+                </div>
                 <div>
-                  <p className="text-sm font-medium mb-2">Specializes in:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {character.specialties.map((specialty, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {specialty}
-                      </Badge>
-                    ))}
-                  </div>
+                  {character.age} years old
                 </div>
+              </div>
 
-                {character.unlocked ? (
-                  <>
-                    {/* Relationship Progress */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Relationship Level</span>
-                        <span>{character.relationshipLevel}%</span>
-                      </div>
-                      <Progress value={character.relationshipLevel} className="h-2" />
-                    </div>
+              <p className="text-sm">{character.backstory}</p>
+              
+              {character.relationshipLevel !== undefined && (
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Relationship</span>
+                    <span>{character.relationshipLevel}%</span>
+                  </div>
+                  <Progress value={character.relationshipLevel} className="h-2" />
+                </div>
+              )}
+              
+              <div className="flex flex-wrap gap-2">
+                {character.specialties.map((specialty, index) => (
+                  <Badge key={index} variant="outline">{specialty}</Badge>
+                ))}
+              </div>
 
-                    {/* Stats */}
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <MessageCircle className="w-4 h-4" />
-                        {character.conversationsCompleted} conversations
+              {character.isLocked ? (
+                <div>
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <p className="font-medium mb-2">🔒 Character Locked</p>
+                    <p className="text-sm text-muted-foreground">
+                      {character.unlockRequirement.type === 'level' ? 
+                        `Reach Level ${character.unlockRequirement.value}` :
+                        character.unlockRequirement.type === 'conversations' ?
+                        `Complete ${character.unlockRequirement.value} Conversations` :
+                        character.unlockRequirement.type === 'points' ?
+                        `Earn ${character.unlockRequirement.value} Points` :
+                        'Premium Feature'}
+                    </p>
+                  </div>
+                  <Button 
+                    className="w-full mt-4"
+                    onClick={() => handleUnlock(character._id)}
+                  >
+                    Unlock Character
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {character.totalConversations !== undefined && (
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-4 w-4" />
+                        <span>{character.totalConversations} conversations</span>
                       </div>
-                      {character.lastInteraction && (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {character.lastInteraction}
-                        </div>
+                      {character.lastInteractionAt && (
+                        <span>Last: {new Date(character.lastInteractionAt).toLocaleDateString()}</span>
                       )}
                     </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-2 pt-2">
-                      <Button className="flex-1">
-                        <MessageCircle className="w-4 h-4 mr-2" />
-                        Start Conversation
-                      </Button>
-                      <Button variant="outline">
-                        <BookOpen className="w-4 h-4 mr-2" />
-                        View Profile
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {/* Unlock Requirements */}
-                    <div className="bg-muted/50 rounded-lg p-4 text-center">
-                      <Lock className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm font-medium mb-1">Character Locked</p>
-                      <p className="text-xs text-muted-foreground">
-                        {character.unlockRequirement}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
+                  )}
+                  <Button 
+                    className="w-full" 
+                    onClick={() => handleStartChat(character._id)}
+                  >
+                    Start Conversation
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
       </div>
-
-      {/* Conversation Starter Tips */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Play className="w-5 h-5" />
-            Conversation Tips
-          </CardTitle>
-          <CardDescription>
-            Get the most out of your character interactions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h4 className="font-semibold mb-2">Ask About Their Work</h4>
-              <p className="text-sm text-muted-foreground">
-                Each character loves talking about their profession. Great for learning specialized vocabulary!
-              </p>
-            </div>
-            
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h4 className="font-semibold mb-2">Share Your Interests</h4>
-              <p className="text-sm text-muted-foreground">
-                Tell them about your hobbies and interests. They'll respond with related vocabulary and cultural insights.
-              </p>
-            </div>
-            
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h4 className="font-semibold mb-2">Ask for Corrections</h4>
-              <p className="text-sm text-muted-foreground">
-                Don't be afraid to make mistakes! Characters will gently correct you and explain grammar rules.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

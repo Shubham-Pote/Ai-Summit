@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToast } from "@/hooks/use-toast"
+import { profileAPI } from "@/lib/api"
 
 const Profile = () => {
   const { user: contextUser, logout, switchLanguage, updateUser } = useAuth()
@@ -55,28 +56,7 @@ const Profile = () => {
   const fetchProfile = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem("token")
-      if (!token) {
-        handleLogout()
-        return
-      }
-
-      const response = await fetch("https://ai-summit-fic4.vercel.app/api/auth/profile", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          handleLogout()
-          return
-        }
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const data = await response.json()
+      const data = await profileAPI.getProfile()
 
       if (data.success && data.user) {
         setProfile(data)
@@ -122,52 +102,35 @@ const Profile = () => {
 
       console.log("🔄 Updating profile with data:", formData)
 
-      // ✅ This matches your backend exactly: PUT /api/auth/profile
-      const response = await fetch("https://ai-summit-fic4.vercel.app/api/auth/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          displayName: formData.displayName.trim(),
-          bio: formData.bio.trim(),
-          location: formData.location.trim(),
-        }),
+      const result = await profileAPI.updateProfile({
+        displayName: formData.displayName.trim(),
+        bio: formData.bio.trim(),
+        location: formData.location.trim(),
       })
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          handleLogout()
-          return
-        }
-        throw new Error(`HTTP ${response.status}`)
-      }
+      console.log("✅ Profile update response:", result)
 
-      const data = await response.json()
-      console.log("✅ Profile update response:", data)
-
-      if (data.success && data.user) {
+      if (result.success && result.user) {
         toast({
           title: "Success! ✅",
           description: "Profile updated successfully",
         })
 
         // Update both local state and context
-        updateUser(data.user)
+        updateUser(result.user)
         setProfile((prevProfile) => ({
           ...prevProfile,
-          user: data.user,
+          user: result.user,
         }))
 
         // Update form to reflect saved data
         setFormData({
-          displayName: data.user.displayName || "",
-          bio: data.user.bio || "",
-          location: data.user.location || "",
+          displayName: result.user.displayName || "",
+          bio: result.user.bio || "",
+          location: result.user.location || "",
         })
       } else {
-        throw new Error(data.message || "Update failed")
+        throw new Error(result.message || "Update failed")
       }
     } catch (error: any) {
       console.error("❌ Profile update error:", error)

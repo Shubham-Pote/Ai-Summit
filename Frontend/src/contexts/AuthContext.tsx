@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { authAPI } from '@/lib/api';
 
 interface User {
   id: string;
@@ -39,21 +40,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const storedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     
-    console.log('🔍 App start - Token exists:', !!token);
+    console.log('🔍 App start - Token exists:', !!storedToken);
     console.log('🔍 App start - User exists:', !!savedUser);
     
-    if (token && savedUser) {
+    if (storedToken && savedUser) {
       try {
         const userData = JSON.parse(savedUser);
+        setToken(storedToken);
         setUser(userData);
         console.log('✅ User restored from localStorage:', userData.displayName);
       } catch (error) {
         console.error('❌ Failed to parse saved user');
+        setToken(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
@@ -67,29 +71,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  // Added register method
+  // Register method using authAPI
   const register = async (userData: RegisterData) => {
     try {
       console.log('🔐 Register attempt for:', userData.email);
       
-      const response = await fetch('https://ai-summit-fic4.vercel.app/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle specific error cases
-        if (response.status === 409) {
-          throw { message: data.message, field: data.field };
-        }
-        throw new Error(data.message || 'Registration failed');
-      }
+      const data = await authAPI.register(userData);
 
       if (data.success && data.token) {
-        localStorage.setItem('token', data.token);
+        setToken(data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
         console.log('✅ Registration successful');
@@ -106,20 +96,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('🔐 Login attempt for:', email);
       
-      const response = await fetch('https://ai-summit-fic4.vercel.app/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Login failed: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await authAPI.login({ email, password });
       
       if (data.success && data.token) {
-        localStorage.setItem('token', data.token);
+        setToken(data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
         console.log('✅ Login successful');
@@ -136,6 +116,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     console.log('🔓 Logging out');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    setToken(null);
     setUser(null);
   };
 
@@ -143,26 +124,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('🌍 Switching language to:', language);
       
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await fetch('https://ai-summit-fic4.vercel.app/api/auth/language', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ language })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to switch language: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await authAPI.switchLanguage(language);
       
       if (data.success && data.user) {
         updateUser(data.user);

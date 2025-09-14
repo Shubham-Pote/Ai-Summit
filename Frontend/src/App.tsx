@@ -23,6 +23,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 import StudyHub from './pages/StudyHub';
+import CharacterChat from './pages/CharacterChat';
 
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/notes" element={<Notes />} />
               <Route path="/word-of-day" element={<WordOfDay />} />
               <Route path="/characters" element={<Characters />} />
+              <Route path="/chat/:characterId" element={<CharacterChat />} />
               <Route path="/goals" element={<Goals />} />
               <Route path="/study-hub" element={<StudyHub />} />
             </Route>
