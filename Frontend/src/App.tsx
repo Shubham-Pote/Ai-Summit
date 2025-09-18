@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import RequireAuth from "@/components/RequireAuth";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -18,13 +17,13 @@ import AIChat from "./pages/AIChat";
 import Reading from "./pages/Reading";
 import Notes from "./pages/Notes";
 import WordOfDay from "./pages/WordOfDay";
-import Characters from "./pages/Characters";
 import Goals from "./pages/Goals";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 import StudyHub from './pages/StudyHub';
-import CharacterChat from './pages/CharacterChat';
+import CharacterSelection from './pages/CharacterSelection';
+import CharacterChatInterface from './pages/CharacterChatInterface';
 
 
 const queryClient = new QueryClient();
@@ -44,11 +43,7 @@ const App = () => (
             
             {/* Protected Routes */}
             <Route
-              element={
-                <RequireAuth>
-                  <Layout />
-                </RequireAuth>
-              }
+              element={<Layout />}
             >
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/lessons" element={<Lessons />} />
@@ -61,10 +56,10 @@ const App = () => (
               <Route path="/reading" element={<Reading />} />
               <Route path="/notes" element={<Notes />} />
               <Route path="/word-of-day" element={<WordOfDay />} />
-              <Route path="/characters" element={<Characters />} />
-              <Route path="/chat/:characterId" element={<CharacterChat />} />
               <Route path="/goals" element={<Goals />} />
               <Route path="/study-hub" element={<StudyHub />} />
+              <Route path="/characters" element={<CharacterSelection />} />
+              <Route path="/character-chat/:characterId" element={<CharacterChatInterface />} />
             </Route>
             
             {/* Catch-all Route */}

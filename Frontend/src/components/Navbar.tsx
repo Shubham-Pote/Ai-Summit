@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { BookOpen, BarChart3, Users, Brain, GraduationCap, User } from "lucide-react"
+import { BookOpen, BarChart3, Brain, GraduationCap, User, Users } from "lucide-react"
 
 const Navbar = () => {
   const location = useLocation()
@@ -8,8 +8,8 @@ const Navbar = () => {
   const navItems = [
     { path: "/dashboard", label: "Dashboard", icon: BarChart3 },
     { path: "/lessons", label: "Lessons", icon: BookOpen },
-    { path: "/study-hub", label: "Study Hub", icon: GraduationCap },
     { path: "/characters", label: "Characters", icon: Users },
+    { path: "/study-hub", label: "Study Hub", icon: GraduationCap },
     { path: "/profile", label: "Profile", icon: User },
   ]
 

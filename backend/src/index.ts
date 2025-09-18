@@ -1,77 +1,90 @@
-// src/server.ts - Just update the imports
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import dotenv from 'dotenv';
-import path from 'path';
-import connectDB from './config/database';
+// src/index.ts
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import dotenv from "dotenv";
+import path from "path";
+import http from "http";
 
-// Your existing routes
-import authRoutes from './routes/auth.routes';
-import lessonRoutes from './routes/lesson.routes';
-import notesRoutes from './routes/notes.routes';
-import readingArticleRoutes from './routes/readingArticle.routes';
+import connectDB from "./config/database";
+import { initWebsocketLayer } from "./websocket/socketServer";
 
-// Character AI routes (make sure these files exist)
-import characterSelectionRoutes from './routes/characterSelection.routes';
-import characterRoutes from './routes/character.routes';
-import conversationRoutes from './routes/conversation.routes';
-import audioRoutes from './routes/audio.routes';
+// ────────────────────────────────────────────────────────────
+// REST route imports
+// ────────────────────────────────────────────────────────────
+import authRoutes from "./routes/auth.routes";
+import lessonRoutes from "./routes/lesson.routes";
+import notesRoutes from "./routes/notes.routes";
+import readingArticleRoutes from "./routes/readingArticle.routes";
 
-dotenv.config();
+import characterRoutes from "./routes/character.routes";
+import settingsRoutes from "./routes/settings.routes";
+import vrmRoutes from "./routes/vrm.routes";
 
-const app = express();
-const port = process.env.PORT || 5000;
-
+// ────────────────────────────────────────────────────────────
+// Environment & DB
+// ────────────────────────────────────────────────────────────
+dotenv.config({ path: path.join(__dirname, '.env') });
 connectDB();
 
-// Middleware
+// ────────────────────────────────────────────────────────────
+// Express + HTTP server bootstrap
+// ────────────────────────────────────────────────────────────
+const app = express();
+const server = http.createServer(app);        // share port with Socket.IO
+const io = initWebsocketLayer(server);        // websocket namespaces
+app.set("io", io);                            // expose to controllers
+
+// ────────────────────────────────────────────────────────────
+// Global middleware
+// ────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
-// Serve static audio files
-app.use('/audio', express.static(path.join(__dirname, '../public/audio')));
-app.use('/character-audio', express.static(path.join(__dirname, '../uploads/audio')));
+// Static audio (lesson mp3/ogg)
+app.use("/audio", express.static(path.join(__dirname, "../public/audio")));
 
-// Welcome route
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Welcome to the Language Learning API with Character AI Support',
+// ────────────────────────────────────────────────────────────
+// Welcome
+// ────────────────────────────────────────────────────────────
+app.get("/", (_req, res) =>
+  res.json({
+    message: "Welcome to the Language Learning API",
     features: [
-      'Traditional Lessons',
-      'Notes & Reading', 
-      'Character AI Conversations',
-      'Voice Chat Support'
+      "Traditional Lessons",
+      "Notes & Reading",
+      "AI Characters (real-time chat & VRM animation)"
     ]
-  });
-});
+  })
+);
 
-// Your existing routes
-app.use('/api/auth', authRoutes);
-app.use('/api/lessons', lessonRoutes);
-app.use('/api/notes', notesRoutes);
-app.use('/api/reading', readingArticleRoutes);
+// ────────────────────────────────────────────────────────────
+// REST routes
+// ────────────────────────────────────────────────────────────
+app.use("/api/auth",     authRoutes);
+app.use("/api/lessons",  lessonRoutes);
+app.use("/api/notes",    notesRoutes);
+app.use("/api/reading",  readingArticleRoutes);
 
-// Character AI routes
-app.use('/api/character-setup', characterSelectionRoutes);
-app.use('/api/characters', characterRoutes);
-app.use('/api/conversations', conversationRoutes);
-app.use('/api/audio', audioRoutes);
+app.use("/api/character", characterRoutes);
+app.use("/api/settings",  settingsRoutes);
+app.use("/api/vrm",       vrmRoutes);
 
-// Error handling
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack);
-    res.status(500).json({ 
-        success: false, 
-        message: 'Something broke!' 
-    });
-});
+// ────────────────────────────────────────────────────────────
+// Error handler
+// ────────────────────────────────────────────────────────────
+app.use(
+  (err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Something broke!" });
+  }
+);
 
-app.listen(port, () => {
-  console.log(`🚀 Server is running on port ${port}`);
-  console.log(`📚 Traditional learning: /api/lessons, /api/notes, /api/reading`);
-  console.log(`🎭 Character AI: /api/characters, /api/conversations`);
-  console.log(`🎵 Audio files: /audio/ (lessons) & /character-audio/ (AI voices)`);
-  console.log(`🌐 Welcome endpoint: http://localhost:${port}/`);
-});
+// ────────────────────────────────────────────────────────────
+// Start server
+// ────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () =>
+  console.log(`🚀 REST & WebSocket server running at http://localhost:${PORT}`)
+);

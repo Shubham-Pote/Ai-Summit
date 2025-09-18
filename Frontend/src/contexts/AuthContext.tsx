@@ -43,26 +43,42 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    
-    console.log('🔍 App start - Token exists:', !!storedToken);
-    console.log('🔍 App start - User exists:', !!savedUser);
-    
-    if (storedToken && savedUser) {
-      try {
-        const userData = JSON.parse(savedUser);
-        setToken(storedToken);
-        setUser(userData);
-        console.log('✅ User restored from localStorage:', userData.displayName);
-      } catch (error) {
-        console.error('❌ Failed to parse saved user');
-        setToken(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    const validateToken = async () => {
+      const storedToken = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user');
+      
+      console.log('🔍 App start - Token exists:', !!storedToken);
+      console.log('🔍 App start - User exists:', !!savedUser);
+      
+      if (storedToken && savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          setToken(storedToken);
+          
+          // Validate token with backend
+          console.log('🔐 Validating token with backend...');
+          const profileData = await authAPI.getProfile();
+          
+          if (profileData.success && profileData.user) {
+            setUser(profileData.user);
+            // Update localStorage with fresh user data
+            localStorage.setItem('user', JSON.stringify(profileData.user));
+            console.log('✅ Token validated, user restored:', profileData.user.displayName);
+          } else {
+            throw new Error('Invalid token response');
+          }
+        } catch (error) {
+          console.error('❌ Token validation failed:', error);
+          setToken(null);
+          setUser(null);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    validateToken();
   }, []);
 
   const updateUser = (userData: User) => {

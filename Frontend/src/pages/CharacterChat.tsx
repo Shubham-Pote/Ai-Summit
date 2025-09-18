@@ -41,8 +41,13 @@ export default function CharacterChat() {
   useEffect(() => {
     const startNewConversation = async () => {
       try {
-        const { conversationId: newConversationId } = await profileAPI.startConversation(characterId!);
-        setConversationId(newConversationId);
+        const response = await profileAPI.startConversation(characterId!);
+        setConversationId(response.conversation._id);
+        
+        // Add initial message if provided
+        if (response.initialMessage) {
+          setMessages([response.initialMessage]);
+        }
       } catch (error) {
         toast({
           title: 'Error',
@@ -69,11 +74,30 @@ export default function CharacterChat() {
     e.preventDefault();
     if (!input.trim() || !conversationId) return;
 
+    const userMessage = input.trim();
+    setInput('');
+
+    // Add user message immediately to UI
+    const tempUserMessage = {
+      _id: 'temp-user-' + Date.now(),
+      conversationId,
+      sender: 'user' as const,
+      content: userMessage,
+      createdAt: new Date().toISOString()
+    };
+    setMessages(prev => [...prev, tempUserMessage]);
+
     try {
-      const response = await profileAPI.sendMessage(conversationId, input.trim());
-      setMessages(prev => [...prev, response.message]);
-      setInput('');
+      const response = await profileAPI.sendMessage(conversationId, userMessage);
+      
+      // Replace temp message with actual messages from server
+      setMessages(prev => {
+        const withoutTemp = prev.filter(m => m._id !== tempUserMessage._id);
+        return [...withoutTemp, response.userMessage, response.characterMessage];
+      });
     } catch (error) {
+      // Remove temp message on error
+      setMessages(prev => prev.filter(m => m._id !== tempUserMessage._id));
       toast({
         title: 'Error',
         description: 'Failed to send message',
@@ -95,12 +119,15 @@ export default function CharacterChat() {
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const audioFile = new File([audioBlob], 'voice-message.wav', { type: 'audio/wav' });
+        
         try {
-          await profileAPI.uploadAudio(audioBlob, conversationId!);
+          const response = await profileAPI.sendVoiceMessage(conversationId!, audioFile);
+          setMessages(prev => [...prev, response.userMessage, response.characterMessage]);
         } catch (error) {
           toast({
             title: 'Error',
-            description: 'Failed to upload audio',
+            description: 'Failed to send voice message',
             variant: 'destructive',
           });
         }
@@ -134,12 +161,10 @@ export default function CharacterChat() {
         {/* Character Info & 3D Model */}
         <div className="lg:col-span-1">
           <Card className="p-4">
-            {character.modelUrl && (
-              <CharacterViewer 
-                modelUrl={character.modelUrl} 
-                className="w-full h-[400px] mb-4"
-              />
-            )}
+            <CharacterViewer 
+              modelUrl="/models/character.glb"
+              className="w-full h-[400px] mb-4"
+            />
             <h2 className="text-2xl font-bold mb-2">{character.name}</h2>
             <p className="text-sm text-gray-600 mb-4">{character.occupation} • {character.location}</p>
             <p className="mb-4">{character.backstory}</p>
@@ -159,17 +184,28 @@ export default function CharacterChat() {
                   }`}
                 >
                   <div
-                    className={`inline-block p-3 rounded-lg ${
+                    className={`inline-block p-3 rounded-lg max-w-xs ${
                       message.sender === 'user'
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted'
                     }`}
                   >
-                    {message.content}
-                    {message.audioUrl && (
-                      <audio controls className="mt-2">
-                        <source src={message.audioUrl} type="audio/mpeg" />
+                    <p>{message.content}</p>
+                    {(message.audioUrl || message.characterAudioUrl || message.userAudioUrl) && (
+                      <audio controls className="mt-2 w-full">
+                        <source src={message.audioUrl || message.characterAudioUrl || message.userAudioUrl} type="audio/mpeg" />
+                        Your browser does not support the audio element.
                       </audio>
+                    )}
+                    {message.sender === 'character' && message.grammarCorrections && message.grammarCorrections.length > 0 && (
+                      <div className="mt-2 p-2 bg-yellow-100 rounded text-xs text-black">
+                        <strong>Grammar tip:</strong> {message.grammarCorrections[0].explanation}
+                      </div>
+                    )}
+                    {message.sender === 'character' && message.vocabularyHighlights && message.vocabularyHighlights.length > 0 && (
+                      <div className="mt-2 p-2 bg-blue-100 rounded text-xs text-black">
+                        <strong>Vocabulary:</strong> {message.vocabularyHighlights[0].word} - {message.vocabularyHighlights[0].definition}
+                      </div>
                     )}
                   </div>
                 </div>

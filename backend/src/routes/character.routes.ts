@@ -1,32 +1,27 @@
-// routes/character.routes.ts - SIMPLE FIX
-import express from 'express';
+// Character API routes
+import { Router } from "express";
 import { 
-  getCharacters, 
-  getCharacterById, 
-  unlockCharacter,
-  getCharacterStats 
-} from '../controllers/character.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
+  getHistory, 
+  clearHistory, 
+  startConversation, 
+  sendMessage, 
+  endConversation 
+} from "../controllers/character.controller";
+import { apiRateLimiter } from "../middleware/rateLimiter.middleware";
+import { authMiddleware } from "../middleware/auth.middleware";
 
-const router = express.Router();
+const router = Router();
 
+// Apply authentication to all character routes
 router.use(authMiddleware);
 
-// Simple wrapper functions to fix TypeScript errors
-router.get('/', async (req, res) => {
-  return getCharacters(req as any, res);
-});
+// Conversation management
+router.post("/start", apiRateLimiter, startConversation);
+router.post("/message", apiRateLimiter, sendMessage);
+router.put("/end/:sessionId", apiRateLimiter, endConversation);
 
-router.get('/:id', async (req, res) => {
-  return getCharacterById(req as any, res);
-});
-
-router.post('/:id/unlock', async (req, res) => {
-  return unlockCharacter(req as any, res);
-});
-
-router.get('/:id/stats', async (req, res) => {
-  return getCharacterStats(req as any, res);
-});
+// History management
+router.get("/history", apiRateLimiter, getHistory);
+router.delete("/history", apiRateLimiter, clearHistory);
 
 export default router;

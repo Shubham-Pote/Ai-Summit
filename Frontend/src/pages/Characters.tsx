@@ -22,7 +22,22 @@ const Characters = () => {
     const fetchCharacters = async () => {
       try {
         const { characters } = await profileAPI.getCharacters();
-        setCharacters(characters);
+        
+        // Sort characters: unlocked first, then locked, then by difficulty level
+        const sortedCharacters = characters.sort((a, b) => {
+          // First priority: unlocked status (free characters or explicitly unlocked)
+          const aUnlocked = !a.isLocked || a.isUnlocked;
+          const bUnlocked = !b.isLocked || b.isUnlocked;
+          
+          if (aUnlocked && !bUnlocked) return -1;
+          if (!aUnlocked && bUnlocked) return 1;
+          
+          // Second priority: difficulty level
+          const difficultyOrder = { 'beginner': 0, 'intermediate': 1, 'advanced': 2 };
+          return difficultyOrder[a.difficultyLevel] - difficultyOrder[b.difficultyLevel];
+        });
+        
+        setCharacters(sortedCharacters);
       } catch (error) {
         toast({
           title: 'Error',
@@ -102,31 +117,21 @@ const Characters = () => {
             </CardHeader>
             
             <div className="h-[300px] relative overflow-hidden rounded-md">
-              {character.modelUrl ? (
-                <div className="relative w-full h-full bg-gradient-to-b from-muted/5 to-muted/20">
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center h-full">
-                      <div className="flex items-center space-x-2">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                        <span className="text-sm text-muted-foreground">Loading 3D model...</span>
-                      </div>
+              <div className="relative w-full h-full bg-gradient-to-b from-muted/5 to-muted/20">
+                <Suspense fallback={
+                  <div className="flex items-center justify-center h-full">
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <span className="text-sm text-muted-foreground">Loading 3D model...</span>
                     </div>
-                  }>
-                    <CharacterViewer 
-                      modelUrl={character.modelUrl} 
-                      className="w-full h-full"
-                    />
-                  </Suspense>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full bg-gradient-to-b from-muted/5 to-muted/20">
-                  <Avatar className="h-24 w-24">
-                    <AvatarFallback className="bg-primary/10">
-                      {character.avatar || character.name[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              )}
+                  </div>
+                }>
+                  <CharacterViewer 
+                    modelUrl="/models/character.glb"
+                    className="w-full h-full"
+                  />
+                </Suspense>
+              </div>
             </div>
             
             <CardContent className="space-y-4">
@@ -158,16 +163,16 @@ const Characters = () => {
                 ))}
               </div>
 
-              {character.isLocked ? (
+              {(character.isLocked && !character.isUnlocked) ? (
                 <div>
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <p className="font-medium mb-2">🔒 Character Locked</p>
                     <p className="text-sm text-muted-foreground">
-                      {character.unlockRequirement.type === 'level' ? 
+                      {character.unlockRequirement?.type === 'level' ? 
                         `Reach Level ${character.unlockRequirement.value}` :
-                        character.unlockRequirement.type === 'conversations' ?
+                        character.unlockRequirement?.type === 'conversations' ?
                         `Complete ${character.unlockRequirement.value} Conversations` :
-                        character.unlockRequirement.type === 'points' ?
+                        character.unlockRequirement?.type === 'points' ?
                         `Earn ${character.unlockRequirement.value} Points` :
                         'Premium Feature'}
                     </p>

@@ -15,7 +15,6 @@ export interface Character {
   teachingStyle: string;
   vocabularyFocus: string[];
   avatar: string;
-  modelUrl?: string; // URL for the .glb model
   voiceSettings: {
     openaiVoice: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
     defaultSpeed: number;
@@ -71,6 +70,28 @@ export interface Message {
   conversationId: string;
   sender: 'user' | 'character' | 'system';
   content: string;
-  audioUrl?: string;
+  translatedContent?: string;
+  userAudioUrl?: string;
+  characterAudioUrl?: string;
+  audioUrl?: string; // For backward compatibility
+  audioProcessingTime?: number;
+  transcriptionAccuracy?: number;
+  grammarCorrections?: {
+    original: string;
+    corrected: string;
+    explanation: string;
+  }[];
+  vocabularyHighlights?: {
+    word: string;
+    definition: string;
+    context: string;
+  }[];
+  characterEmotion?: string;
+  teachingMoment?: {
+    type: 'grammar' | 'vocabulary' | 'culture' | 'pronunciation';
+    explanation: string;
+  };
+  timestamp?: string;
   createdAt: string;
+  processingTime?: number;
 }
